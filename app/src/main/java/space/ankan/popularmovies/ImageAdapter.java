@@ -1,6 +1,7 @@
 package space.ankan.popularmovies;
 
 import android.content.Context;
+import android.graphics.Movie;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +11,46 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class ImageAdapter extends ArrayAdapter<MoviesInformation> {
     private Context mContext;
+    private ArrayList<MoviesInformation> movieList = new ArrayList<>();
+    public int pagesFetched = 0;
+
+    public ArrayList<MoviesInformation> getMovieList() {
+        return movieList;
+    }
+    @Override
+    public void addAll(MoviesInformation... items) {
+        super.addAll(items);
+        this.movieList.addAll(Arrays.asList(items));
+    }
+
+    @Override
+    public void addAll(Collection<? extends MoviesInformation> collection) {
+        super.addAll(collection);
+        this.movieList.addAll(collection);
+    }
+
+    @Override
+    public void add(MoviesInformation object) {
+        super.add(object);
+        this.movieList.add(object);
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        this.movieList.clear();
+    }
 
     public ImageAdapter(Context c, List<MoviesInformation> movieList) {
         super(c, 0, movieList);
+        this.movieList.addAll(movieList);
         mContext = c;
     }
 

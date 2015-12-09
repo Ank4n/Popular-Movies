@@ -1,10 +1,14 @@
 package space.ankan.popularmovies;
 
+import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +30,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+//import android.support.v4.app.Fragment;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -33,16 +39,94 @@ public class MainActivityFragment extends Fragment {
 
     private static final String LOG_CAT = MainActivityFragment.class.getSimpleName();
     public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-    private static int pagesFetched;
+    //private static int pagesFetched;
+    private static String sortBy;
+    private static boolean sortChanged = false;
+    private static boolean fetching = false;
 
     private String imageSize;
+    private ImageAdapter adapterByPopularity;
+    private ImageAdapter adapterByRating;
     private ImageAdapter adapter;
-
+    private GridView mGridView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        ArrayList<MoviesInformation> movieList = new ArrayList<>();
+
+        if (adapter != null)
+            movieList = adapter.getMovieList();
+
+        outState.putParcelableArrayList("movies", movieList);
+        outState.putInt("pages", adapter.pagesFetched);
+    }
+
+    @Override
+    public void setRetainInstance(boolean retain) {
+        super.setRetainInstance(true);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+
+            ArrayList<MoviesInformation> movieList = savedInstanceState.getParcelableArrayList("movies");
+            adapter.pagesFetched = savedInstanceState.getInt("pages");
+            if (movieList != null) {
+                if (adapter == null)
+                    adapter = new ImageAdapter(getActivity(), movieList);
+                else
+                    adapter.addAll(movieList);
+            }
+        }
+        resetAdapter();
+
+        super.onViewStateRestored(savedInstanceState);
+
+    }
+
+    private void resetAdapter() {
+        if (sortChanged == true) {
+            //adapter = new ImageAdapter(getActivity(), new ArrayList<MoviesInformation>());
+            String sorterText = getContext().getString(R.string.pref_sort_by_popularity).equals(sortBy) ? "Popularity" : "Rating";
+            Toast.makeText(getContext(), "Showing movies based on " + sorterText, Toast.LENGTH_SHORT).show();
+            sortChanged = false;
+            mGridView.setAdapter(adapter);
+        }
+        new FetchMovies().execute();
+    }
+
+    private void checkSortPreference() {
+
+        Context context = getContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String sortByKey = context.getString(R.string.pref_sort_by_key);
+        String sortByValue = prefs.getString(sortByKey,
+                context.getString(R.string.pref_sort_by_popularity));
+
+        if (getContext().getString(R.string.pref_sort_by_popularity).equals(sortByValue))
+            adapter = adapterByPopularity;
+        else
+            adapter = adapterByRating;
+
+        if (sortBy == null || (!sortBy.equals(sortByValue))) {
+            sortBy = sortByValue;
+            sortChanged = true;
+        }
+    }
+
 
     public MainActivityFragment() {
 
@@ -51,10 +135,17 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        pagesFetched = 0;
-        if (adapter != null)
-            adapter.clear();
-        new FetchMovies().execute();
+//        pagesFetched = 0;
+//        if (adapter != null)
+//            adapter.clear();
+//       new FetchMovies().execute();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkSortPreference();
+        resetAdapter();
     }
 
     @Override
@@ -62,8 +153,11 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        GridView gridView = (GridView) rootView.findViewById(R.id.gridview_movies);
-        List<MoviesInformation> movieList = new ArrayList<>();
+        mGridView = (GridView) rootView.findViewById(R.id.gridview_movies);
+
+        adapterByPopularity = new ImageAdapter(getActivity(), new ArrayList<MoviesInformation>());
+        adapterByRating = new ImageAdapter(getActivity(), new ArrayList<MoviesInformation>());
+        checkSortPreference();
         /* fake data
         movieList.add(new MoviesInformation("/D6e8RJf2qUstnfkTslTXNTUAlT.jpg"));
         movieList.add(new MoviesInformation("/mSvpKOWbyFtLro9BjfEGqUw5dXE.jpg"));
@@ -79,10 +173,9 @@ public class MainActivityFragment extends Fragment {
         movieList.add(new MoviesInformation("/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"));
         movieList.add(new MoviesInformation("/69Cz9VNQZy39fUE2g0Ggth6SBTM.jpg"));*/
 
-        adapter = new ImageAdapter(getActivity(), movieList);
-        gridView.setAdapter(adapter);
+        mGridView.setAdapter(adapter);
 
-        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
 
@@ -92,22 +185,22 @@ public class MainActivityFragment extends Fragment {
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
                 FetchMovies fetchMovies = new FetchMovies();
-                if (firstVisibleItem + visibleItemCount == pagesFetched * 20 && totalItemCount > 0) {
-                    Toast.makeText(getActivity(), "First Visible Item = " + firstVisibleItem + " Visible Item Count = " + visibleItemCount + " Total Item Count = " + totalItemCount, Toast.LENGTH_SHORT).show();
+                if (firstVisibleItem + visibleItemCount == adapter.pagesFetched * 20 && totalItemCount > 0 && !fetching) {
                     fetchMovies.execute();
                 }
             }
         });
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(getActivity(), "Position: " + position + " id: " + id, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                MoviesInformation movieInfo = adapter.getItem(position);
+                intent.putExtra("movie", movieInfo);
+                startActivity(intent);
             }
         });
 
-        if (pagesFetched == 0)
-            new FetchMovies().execute();
         return rootView;
     }
 
@@ -122,22 +215,26 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected List<MoviesInformation> doInBackground(String... params) {
+            fetching = true;
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
-            pagesFetched++;
 
-            String sortBy = "popularity.desc";
+            if (adapter.pagesFetched >= 10)
+                return null;
+
+            adapter.pagesFetched++;
 
             try {
-                String page = String.valueOf(pagesFetched);
-                Log.v(LOG_CAT, "fetching page " + page + " of 1000");
+                String page = String.valueOf(adapter.pagesFetched);
+                Log.v(LOG_CAT, "fetching page " + page + " of 10 with " + sortBy + " as the sorting parameter");
 
                 Uri uri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(SORT_PARAM, sortBy)
                         .appendQueryParameter(PAGE_PARAM, page)
                         .appendQueryParameter(API_KEY_PARAM, BuildConfig.API_KEY)
                         .build();
-
+                Log.v(LOG_CAT, uri.toString());
+                Log.v(LOG_CAT, "Adapter Count: [" + adapter.getCount() + "]");
                 URL url = new URL(uri.toString());
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -161,7 +258,7 @@ public class MainActivityFragment extends Fragment {
 
             } catch (java.io.IOException e) {
                 Log.e(LOG_CAT, "Please check your Internet Connection");
-                pagesFetched--;
+                adapter.pagesFetched--;
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -171,6 +268,7 @@ public class MainActivityFragment extends Fragment {
             return movieList;
         }
 
+
         @Override
         protected void onPostExecute(List<MoviesInformation> moviesInfo) {
             super.onPostExecute(moviesInfo);
@@ -178,15 +276,16 @@ public class MainActivityFragment extends Fragment {
             if (moviesInfo == null || moviesInfo.isEmpty())
                 return;
 
-            if (pagesFetched == 1 && adapter.getCount() == 20)
+            if (adapter.pagesFetched == 1 && adapter.getCount() == 20)
                 return;
 
-            if (adapter.getCount() > (pagesFetched-1)*20) {
-                Log.e(LOG_CAT, "Possible duplicate values fetched. Pages Fetched = " + (pagesFetched - 1) + " Total items in data set = " + adapter.getCount());
+            if (adapter.getCount() > (adapter.pagesFetched - 1) * 20) {
+                Log.e(LOG_CAT, "Possible duplicate values fetched. Pages Fetched = " + (adapter.pagesFetched - 1) + " Total items in data set = " + adapter.getCount());
                 return;
             }
 
             adapter.addAll(moviesInfo);
+            fetching = false;
 
         }
 
@@ -194,16 +293,25 @@ public class MainActivityFragment extends Fragment {
 
             List<MoviesInformation> moviesInformation = new ArrayList<>();
             JSONObject movies = new JSONObject(json);
-            JSONArray results = movies.getJSONArray("results");
+            JSONArray results = movies.getJSONArray(MoviesInformation.RESULT_LIST);
 
             for (int i = 0; i < results.length(); i++) {
 
-                String moviePosterUrl = results.getJSONObject(i).getString("poster_path");
-                MoviesInformation movieInfo = new MoviesInformation(moviePosterUrl);
+                JSONObject movie = results.getJSONObject(i);
+
+                MoviesInformation movieInfo = new MoviesInformation(
+                        movie.getString(MoviesInformation.TITLE),
+                        movie.getString(MoviesInformation.POSTER_PATH),
+                        movie.getString(MoviesInformation.RELEASE_DATE),
+                        movie.getString(MoviesInformation.VOTE_COUNT),
+                        movie.getString(MoviesInformation.SYNOPSIS));
+
                 moviesInformation.add(movieInfo);
             }
 
             return moviesInformation;
         }
+
+
     }
 }
