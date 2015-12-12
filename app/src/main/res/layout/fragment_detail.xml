@@ -40,7 +40,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="151"
                 android:textColor="#ff1217" />
 
         </LinearLayout>
@@ -55,9 +54,8 @@
         <TextView
             android:id="@+id/synopsis"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:text="Movie is about 3 friends who lost their college..."
             android:textColor="#506374" />
     </ScrollView>
 
@@ -66,7 +64,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:text="Releasing on 23rd December, 2016"
         android:textColor="#621208" />
 
 

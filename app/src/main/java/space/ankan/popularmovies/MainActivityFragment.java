@@ -30,21 +30,16 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-//import android.support.v4.app.Fragment;
-
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
 
     private static final String LOG_CAT = MainActivityFragment.class.getSimpleName();
-    public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-    //private static int pagesFetched;
     private static String sortBy;
     private static boolean sortChanged = false;
     private static boolean fetching = false;
 
-    private String imageSize;
     private ImageAdapter adapterByPopularity;
     private ImageAdapter adapterByRating;
     private ImageAdapter adapter;
@@ -98,8 +93,7 @@ public class MainActivityFragment extends Fragment {
     }
 
     private void resetAdapter() {
-        if (sortChanged == true) {
-            //adapter = new ImageAdapter(getActivity(), new ArrayList<MoviesInformation>());
+        if (sortChanged) {
             String sorterText = getContext().getString(R.string.pref_sort_by_popularity).equals(sortBy) ? "Popularity" : "Rating";
             Toast.makeText(getContext(), "Showing movies based on " + sorterText, Toast.LENGTH_SHORT).show();
             sortChanged = false;
@@ -158,20 +152,6 @@ public class MainActivityFragment extends Fragment {
         adapterByPopularity = new ImageAdapter(getActivity(), new ArrayList<MoviesInformation>());
         adapterByRating = new ImageAdapter(getActivity(), new ArrayList<MoviesInformation>());
         checkSortPreference();
-        /* fake data
-        movieList.add(new MoviesInformation("/D6e8RJf2qUstnfkTslTXNTUAlT.jpg"));
-        movieList.add(new MoviesInformation("/mSvpKOWbyFtLro9BjfEGqUw5dXE.jpg"));
-        movieList.add(new MoviesInformation("/5JU9ytZJyR3zmClGmVm9q4Geqbd.jpg"));
-        movieList.add(new MoviesInformation("/jjBgi2r5cRt36xF6iNUEhzscEcb.jpg"));
-        movieList.add(new MoviesInformation("/g23cs30dCMiG4ldaoVNP1ucjs6.jpg"));
-        movieList.add(new MoviesInformation("/l3tmn2WOAIgLyGP7zcsTYkl5ejH.jpg"));
-        movieList.add(new MoviesInformation("/q0R4crx2SehcEEQEkYObktdeFy.jpg"));
-        movieList.add(new MoviesInformation("/cWERd8rgbw7bCMZlwP207HUXxym.jpg"));
-        movieList.add(new MoviesInformation("/A7HtCxFe7Ms8H7e7o2zawppbuDT.jpg"));
-        movieList.add(new MoviesInformation("/kqjL17yufvn9OVLyXYpvtyrFfak.jpg"));
-        movieList.add(new MoviesInformation("/vlTPQANjLYTebzFJM1G4KeON0cb.jpg"));
-        movieList.add(new MoviesInformation("/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"));
-        movieList.add(new MoviesInformation("/69Cz9VNQZy39fUE2g0Ggth6SBTM.jpg"));*/
 
         mGridView.setAdapter(adapter);
 
@@ -207,7 +187,6 @@ public class MainActivityFragment extends Fragment {
 
     public class FetchMovies extends AsyncTask<String, Void, List<MoviesInformation>> {
         final String BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
-        final String QUERY_PARAM = "q";
         final String SORT_PARAM = "sort_by";
         final String API_KEY_PARAM = "api_key";
         final String PAGE_PARAM = "page";
@@ -216,8 +195,8 @@ public class MainActivityFragment extends Fragment {
         @Override
         protected List<MoviesInformation> doInBackground(String... params) {
             fetching = true;
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
+            HttpURLConnection urlConnection;
+            BufferedReader reader;
 
             if (adapter.pagesFetched >= 10)
                 return null;
@@ -244,17 +223,17 @@ public class MainActivityFragment extends Fragment {
                 if (inputStream == null)
                     return null;
 
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder builder = new StringBuilder();
                 reader = new BufferedReader(new InputStreamReader(inputStream));
                 String line;
 
                 while ((line = reader.readLine()) != null)
-                    buffer.append(line + "\n");
+                    builder.append(line).append("\n");
 
-                if (buffer.length() == 0)
+                if (builder.length() == 0)
                     return null;
 
-                movieList = getMovieInformationFromJson(buffer.toString());
+                movieList = getMovieInformationFromJson(builder.toString());
 
             } catch (java.io.IOException e) {
                 Log.e(LOG_CAT, "Please check your Internet Connection");

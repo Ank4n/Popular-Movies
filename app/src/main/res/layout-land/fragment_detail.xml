@@ -32,7 +32,7 @@
                 android:layout_alignRight="@+id/movie_poster"
                 android:background="#AA000000"
                 android:elevation="15dp"
-                android:gravity="right"
+                android:gravity="end"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -46,7 +46,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="151"
                     android:textColor="#ff1217" />
 
             </LinearLayout>
@@ -58,7 +57,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:text="Movie is about 3 friends who lost their college..."
             android:textColor="#506374"
             android:layout_below="@+id/movie_poster"/>
         </RelativeLayout>
@@ -69,7 +67,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:text="Releasing on 23rd December, 2016"
         android:textColor="#621208" />
 
 

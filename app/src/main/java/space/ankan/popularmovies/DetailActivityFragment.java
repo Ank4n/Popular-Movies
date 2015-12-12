@@ -23,20 +23,19 @@ public class DetailActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        MoviesInformation movieInfo = (MoviesInformation) getActivity().getIntent().getExtras().getParcelable("movie");
-        getActivity().setTitle(movieInfo.getTitle());
-
+        MoviesInformation movieInfo = getActivity().getIntent().getExtras().getParcelable("movie");
         ImageView moviePoster = (ImageView) rootView.findViewById(R.id.movie_poster);
-        Picasso.with(getContext()).load(movieInfo.getImageurl()).into(moviePoster);
-
         TextView voteCount = (TextView) rootView.findViewById(R.id.vote_count);
-        voteCount.setText(movieInfo.getVoteCount());
-
         TextView releaseDate = (TextView) rootView.findViewById(R.id.release_date);
-        releaseDate.setText(formatDateText(movieInfo.getReleaseDate()));
-
         TextView synopsis = (TextView) rootView.findViewById(R.id.synopsis);
-        synopsis.setText(movieInfo.getSynopsis());
+
+        if (movieInfo != null) {
+            getActivity().setTitle(movieInfo.getTitle());
+            Picasso.with(getContext()).load(movieInfo.getImageurl()).into(moviePoster);
+            voteCount.setText(movieInfo.getVoteCount());
+            releaseDate.setText(formatDateText(movieInfo.getReleaseDate()));
+            synopsis.setText(movieInfo.getSynopsis());
+        }
 
         return rootView;
     }
@@ -44,11 +43,14 @@ public class DetailActivityFragment extends Fragment {
     private String formatDateText(String in) {
 
         StringBuilder text = new StringBuilder();
+        String preText = "Released on ";
         String[] date = in.split("-");
+        if (date.length < 3)
+            return preText + in;
         String year = date[0];
         String month = date[1];
         String day = date[2];
-        text.append("Releasing on " + Integer.parseInt(day));
+        text.append(preText).append(Integer.parseInt(day));
 
         if (day.charAt(0) == '1')
             text.append("th");
@@ -101,9 +103,10 @@ public class DetailActivityFragment extends Fragment {
                 text.append("December");
                 break;
             default:
-                return ("Releasing on " + in);
+                return (preText + in);
         }
-        text.append(", " + year);
+
+        text.append(", ").append(year);
         return text.toString();
 
     }

@@ -1,13 +1,12 @@
 package space.ankan.popularmovies;
 
 import android.content.Context;
-import android.graphics.Movie;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -24,6 +23,7 @@ public class ImageAdapter extends ArrayAdapter<MoviesInformation> {
     public ArrayList<MoviesInformation> getMovieList() {
         return movieList;
     }
+
     @Override
     public void addAll(MoviesInformation... items) {
         super.addAll(items);
@@ -57,28 +57,18 @@ public class ImageAdapter extends ArrayAdapter<MoviesInformation> {
     // create a new ImageView for each item referenced by the Adapter
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        MoviesInformation movieInfo = this.getItem(position);
-        View rootView = LayoutInflater.from(mContext).inflate(R.layout.grid_item_movies, parent, false);
+        ImageView imageView;
 
-        ImageView imageView = (ImageView) rootView.findViewById(R.id.grid_item_imageview);
-
-        if (convertView == null)
-            Picasso.with(mContext).load(movieInfo.getImageurl()).into(imageView);
-
-        else
+        if (convertView == null) {
+            View rootView = LayoutInflater.from(mContext).inflate(R.layout.grid_item_movies, parent, false);
+            imageView = (ImageView) rootView.findViewById(R.id.grid_item_imageview);
+            Picasso.with(mContext).load(this.getItem(position).getImageurl()).into(imageView);
+        } else
             imageView = (ImageView) convertView;
+
 
 
         return imageView;
     }
 
-    /*// references to our images
-    private Integer[] mThumbIds = {
-            R.mipmap.sample_0, R.mipmap.sample_3,
-            R.mipmap.sample_0, R.mipmap.sample_1,
-            R.mipmap.sample_2, R.mipmap.sample_3,
-            R.mipmap.sample_0, R.mipmap.sample_1,
-            R.mipmap.sample_2, R.mipmap.sample_3,
-
-    };*/
 }
