@@ -14,7 +14,7 @@ Made as part of Udacity's Android Nanodegree Program. It has two branches corres
 ###Libraries used
 - Retrofit
 - Butterknife
-- picasso
+- Picasso
 
 ###Screencasts
 - [Mobile screencast] (https://youtu.be/L4VF5NH6g8M)
