@@ -1,6 +1,6 @@
 # Popular-Movies
 
-Made as part of Udacity's Android Nanodegree Program. The Repository has two branches corresponding to two stages of the project. The app uses themoviedb.org api to fetch movie data.
+Made as part of Udacity's Android Nanodegree Program. The repository has two branches corresponding to two stages of the project. The app uses themoviedb.org api to fetch movie data.
 
 ##Stage-II
 - Displays movies in a grid
