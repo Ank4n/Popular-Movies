@@ -8,8 +8,8 @@ Made as part of Udacity's Android Nanodegree Program. It has two branches corres
 - Ability to launch trailer on youtube or browser
 - Ability to mark a movie as favourite persisting the movie details using SQLite database
 - Uses Content Provider to populate favourite movies
-- Ability to share trailer url using ShareActionProvider library
-- Tablet UI used Master Detail layout
+- Ability to share trailer url to other apps
+- Tablet UI uses Master Detail layout
 
 ###Libraries used
 - Retrofit
