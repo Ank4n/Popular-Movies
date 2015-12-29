@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="title_activity_detail">DetailActivity</string>
+    <string name="span_count">2</string>
+
+    <string name="tab_most_popular">MOST POPULAR</string>
+    <string name="tab_highest_rated">HIGHEST RATED</string>
+    <string name="tab_favourites">FAVOURITES</string>
+
+    <string name="pref_sort_by_rating" translatable="false">vote_average.desc</string>
+    <string name="pref_sort_by_popularity" translatable="false">popularity.desc</string>
+
+</resources>
