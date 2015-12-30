@@ -35,6 +35,7 @@ import space.ankan.popularmovies.retrofit.model.Results;
 public class MainActivityFragment extends Fragment implements Callback<Raw> {
     private static final String LOG_CAT = MainActivityFragment.class.getSimpleName();
     public static final String FRAGMENT_KEY = "fragment";
+    private static final String SORT_FAVOURITE = "favt";
 
     private String mSortBy;
     private RecyclerView mRecyclerView;
@@ -53,7 +54,7 @@ public class MainActivityFragment extends Fragment implements Callback<Raw> {
         if (adapter != null)
             movieList = adapter.getItems();
 
-        outState.putParcelableArrayList("movies", movieList);
+        outState.putParcelableArrayList(DetailActivityFragment.MOVIE_INFO, movieList);
         super.onSaveInstanceState(outState);
     }
 
@@ -97,7 +98,7 @@ public class MainActivityFragment extends Fragment implements Callback<Raw> {
                 mSortBy = getResources().getString(R.string.pref_sort_by_rating);
                 break;
             case MainActivity.FRAGMENT_FAVOURITES:
-                mSortBy = "favt";
+                mSortBy = SORT_FAVOURITE;
                 break;
             default:
                 mSortBy = null;
@@ -154,7 +155,7 @@ public class MainActivityFragment extends Fragment implements Callback<Raw> {
 
     private synchronized void fetchMovies() {
 
-        if (mSortBy == "favt")
+        if (SORT_FAVOURITE.equals(mSortBy))
             fetchFavourites();
 
         else if (adapter.getItemCount() < 20)
@@ -180,7 +181,7 @@ public class MainActivityFragment extends Fragment implements Callback<Raw> {
 
     public boolean fetchFavourites() {
 
-        if (getActivity() == null || !"favt".equals(mSortBy)) return false;
+        if (getActivity() == null || !SORT_FAVOURITE.equals(mSortBy)) return false;
 
         Cursor c = getActivity().getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI, new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE_ID, MovieContract.MovieEntry.COLUMN_OVERVIEW, MovieContract.MovieEntry.COLUMN_POSTER_PATH, MovieContract.MovieEntry.COLUMN_RELEASE_DATE, MovieContract.MovieEntry.COLUMN_TITLE, MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE}, null, null, null);
         ArrayList<MovieInfo> movies = new ArrayList<>();
