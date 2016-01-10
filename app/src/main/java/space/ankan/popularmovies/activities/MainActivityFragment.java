@@ -8,18 +8,14 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import retrofit.Callback;
 import retrofit.Response;
 import retrofit.Retrofit;
@@ -167,14 +163,18 @@ public class MainActivityFragment extends Fragment implements Callback<Raw> {
     @Override
     public void onResponse(Response<Raw> response, Retrofit retrofit) {
 
-        Log.e(LOG_CAT, "[response] " + response.raw());
+        Log.i(LOG_CAT, "[response] " + response.raw());
         Results[] results = response.body().getResults();
         List<MovieInfo> movies = extractMovieInformation(results);
         adapter.addAll(movies);
 
         if (!movies.isEmpty() && MainActivity.FRAGMENT_MOST_POPULAR == (getArguments().getInt(FRAGMENT_KEY))) {
-            ((MainActivity) getActivity()).addInitialDetailFragment(movies.get(0));
-            mRecyclerView.setOnTouchListener(null);
+            try {
+                ((MainActivity) getActivity()).addInitialDetailFragment(movies.get(0));
+                mRecyclerView.setOnTouchListener(null);
+            } catch (NullPointerException n) {
+                Log.e(LOG_CAT, n.getMessage());
+            }
         }
 
     }
